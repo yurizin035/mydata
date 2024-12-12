@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $senha = $_POST['senha'];
     $id = 0;
-    $saldo = 50;  // Saldo padrão
+    $saldo = 50; // Saldo padrão
 
     // Caminho do arquivo JSON
     $filePath = 'users.json';
@@ -16,22 +16,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (file_exists($filePath)) {
         $jsonData = file_get_contents($filePath);
         $users = json_decode($jsonData, true);
-        $id = count($users) + 1;  // Novo ID sequencial
+        $id = count($users) + 1; // Novo ID sequencial
     } else {
         $users = [];
-        $id = 1;  // ID inicial
+        $id = 1; // ID inicial
     }
 
     // Verifica se o e-mail ou WhatsApp já estão em uso
+    $erro = '';
     foreach ($users as $user) {
         if ($user['email'] === $email) {
-            echo "Este e-mail já está em uso.";
-            exit;
+            $erro .= "Este e-mail já está em uso. ";
         }
         if ($user['whatsapp'] === $whatsapp) {
-            echo "Este WhatsApp já está em uso.";
-            exit;
+            $erro .= "Este WhatsApp já está em uso. ";
         }
+    }
+
+    if ($erro) {
+        echo $erro;
+        exit;
     }
 
     // Cria um novo usuário
