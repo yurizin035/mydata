@@ -1,6 +1,6 @@
 <?php
 // Definir o caminho do arquivo JSON
-$jsonFilePath = './users.json';
+$jsonFilePath = 'users.json';
 
 // Verificar se a requisição é do tipo POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
