@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Exibe a mensagem de erro correta, se necessário
     if ($emailExists && $whatsappExists) {
         echo "Este e-mail e WhatsApp já estão em uso.";
-    } elseif ($emailExists) {
+    } else if ($emailExists) {
         echo "Este e-mail já está em uso.";
-    } elseif ($whatsappExists) {
+    } else if ($whatsappExists) {
         echo "Este WhatsApp já está em uso.";
     } else {
         // Cria um novo usuário
