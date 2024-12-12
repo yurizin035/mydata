@@ -1,12 +1,25 @@
 <?php
+// Permite requisições de qualquer origem (use seu domínio específico em produção)
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Permite que a requisição use o método OPTIONS (para pré-fluxo CORS)
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;  // Termina a requisição aqui para o pré-fluxo CORS
+}
+
 // Definir o caminho do arquivo JSON
 $jsonFilePath = 'users.json';
 
-// Verificar se a requisição é do tipo POST
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Receber os dados do formulário
-    $email = $_POST['email'] ?? '';
-    $senha = $_POST['senha'] ?? '';
+// Verificar se a requisição é do tipo POST e se o conteúdo é JSON
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+    // Receber os dados JSON da requisição
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+
+    $email = $data['email'] ?? '';
+    $senha = $data['senha'] ?? '';
 
     // Verificar se o arquivo JSON existe
     if (file_exists($jsonFilePath)) {
@@ -32,20 +45,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // Enviar a resposta baseada nas verificações
+        // Enviar a resposta como JSON
         if ($userFound) {
             if ($passwordCorrect) {
-                echo 'Sucesso! Login realizado.';
+                echo json_encode(['message' => 'Sucesso! Login realizado.']);
             } else {
-                echo 'Senha incorreta.';
+                echo json_encode(['message' => 'Senha incorreta.']);
             }
         } else {
-            echo 'Email não encontrado.';
+            echo json_encode(['message' => 'Email não encontrado.']);
         }
     } else {
-        echo 'Erro ao acessar o arquivo de usuários.';
+        echo json_encode(['message' => 'Erro ao acessar o arquivo de usuários.']);
     }
 } else {
-    echo 'Método de requisição inválido.';
+    echo json_encode(['message' => 'Método de requisição inválido ou conteúdo não é JSON.']);
 }
 ?>
