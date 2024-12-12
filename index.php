@@ -1,4 +1,14 @@
 <?php
+// Permite requisições de qualquer origem (use seu domínio específico em produção)
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Permite que a requisição use o método OPTIONS (para pré-fluxo CORS)
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;  // Termina a requisição aqui para o pré-fluxo CORS
+}
+
 // Verifica se o formulário foi submetido
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtém os dados do formulário
