@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'whatsapp' => $whatsapp,
             'email' => $email,
             'senha' => $senha, // Armazena a senha diretamente (use hash em produção)
-            'saldo' => 50
+            'saldo' => 150
         ];
 
         // Adiciona o novo usuário ao array
