@@ -1,7 +1,15 @@
 <?php
-header("Access-Control-Allow-Origin: https://strivepay.web.app"); // Permite apenas origem do site strivepay.web.app
-header("Access-Control-Allow-Methods: GET, OPTIONS"); // Permite GET e OPTIONS
-header("Access-Control-Allow-Headers: Content-Type"); // Permite o cabeçalho Content-Type
+$allowed_origin = "https://strivepay.web.app";
+
+if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === $allowed_origin) {
+    header("Access-Control-Allow-Origin: " . $allowed_origin); 
+    header("Access-Control-Allow-Methods: GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+} else {
+    header("HTTP/1.1 403 Forbidden");
+    echo "Acesso não permitido.";
+    exit;
+}
 
 $jsonData = file_get_contents("users.json");
 echo $jsonData;
