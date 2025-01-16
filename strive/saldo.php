@@ -1,8 +1,11 @@
 <?php
-$allowed_origin = "https://strivepay.web.app";
+$allowed_origins = [
+    "https://strivepay.web.app",
+    "https://api.pushinpay.com.br"
+];
 
-if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === $allowed_origin) {
-    header("Access-Control-Allow-Origin: " . $allowed_origin);
+if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
+    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
     header("Access-Control-Allow-Methods: GET, OPTIONS");
     header("Access-Control-Allow-Headers: Content-Type");
 } else {
@@ -17,11 +20,10 @@ if (!isset($_GET['email']) || !isset($_GET['saldo'])) {
 }
 
 $email = $_GET['email'];
-$saldo = intval($_GET['saldo']) / 100; // Converte os últimos dois dígitos para centavos
+$saldo = intval($_GET['saldo']) / 100;
 $timezone = new DateTimeZone('America/Sao_Paulo');
 $dataAtual = new DateTime('now', $timezone);
 
-// Carregar arquivo JSON
 $arquivo = 'users.json';
 if (!file_exists($arquivo)) {
     echo json_encode(["erro" => "Arquivo users.json não encontrado."]);
@@ -30,26 +32,21 @@ if (!file_exists($arquivo)) {
 
 $usuarios = json_decode(file_get_contents($arquivo), true);
 
-// Encontrar o usuário pelo email
 $usuarioEncontrado = false;
 foreach ($usuarios as &$usuario) {
     if ($usuario['email'] === $email) {
         $usuarioEncontrado = true;
-        
-        // Atualizar receita
+
         $usuario['receita'] += $saldo;
 
-        // Determinar o período do dia
         $hora = intval($dataAtual->format('H'));
         if ($hora >= 0 && $hora < 6) $periodo = 'madrugada';
         elseif ($hora >= 6 && $hora < 12) $periodo = 'manhã';
         elseif ($hora >= 12 && $hora < 18) $periodo = 'tarde';
         else $periodo = 'noite';
 
-        // Atualizar faturamento "hoje"
         $usuario['faturamento'][0]['hoje'][$periodo] += $saldo;
 
-        // Atualizar 7 dias
         $diaSemana = strtolower($dataAtual->format('l'));
         $diasSemana = [
             'monday' => 'segunda',
@@ -62,7 +59,6 @@ foreach ($usuarios as &$usuario) {
         ];
         $usuario['faturamento'][0]['7dias'][$diasSemana[$diaSemana]] += $saldo;
 
-        // Atualizar 30 dias
         $dias30 = [
             '0-4' => range(0, 4),
             '4-8' => range(5, 8),
@@ -78,13 +74,11 @@ foreach ($usuarios as &$usuario) {
             }
         }
 
-        // Atualizar 90 dias
         $diaAno = intval($dataAtual->format('z')) + 1;
         if ($diaAno <= 30) $usuario['faturamento'][0]['90dias']['0-30'] += $saldo;
         elseif ($diaAno <= 60) $usuario['faturamento'][0]['90dias']['31-60'] += $saldo;
         else $usuario['faturamento'][0]['90dias']['61-90'] += $saldo;
 
-        // Atualizar faturamento do mês atual
         $mesAtual = strtolower($dataAtual->format('M'));
         $meses = [
             'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
@@ -96,7 +90,6 @@ foreach ($usuarios as &$usuario) {
     }
 }
 
-// Salvar alterações no arquivo JSON
 if ($usuarioEncontrado) {
     file_put_contents($arquivo, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     echo json_encode(["mensagem" => "Saldo atualizado com sucesso."]);
