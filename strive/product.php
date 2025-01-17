@@ -58,8 +58,12 @@ if ($userIndex === false) {
     exit;
 }
 
-// Adicionando o produto ao usuário encontrado
+// Gerando um ID para o novo produto
+$newProductId = count($data[$userIndex]['produtos']) + 1;
+
+// Adicionando o produto ao usuário encontrado com o novo ID
 $product = [
+    'id' => $newProductId,
     'name' => $name,
     'ticket' => $ticket,
     'url' => $url
