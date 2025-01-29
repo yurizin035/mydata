@@ -1,7 +1,7 @@
 <?php
 $allowed_origins = [
     "https://strivepay.web.app",
-    "https://api.pushinpay.com.br"
+    "https://pushinpay.com.br"
 ];
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
