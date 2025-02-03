@@ -5,15 +5,19 @@ $allowed_origins = [
     "https://databackend.koyeb.app"
 ];
 
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
-    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
-    header("Access-Control-Allow-Methods: GET, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type");
-} else {
-    header("HTTP/1.1 403 Forbidden");
-    echo "Acesso não permitido.";
-    exit;
+$origin_permitida = isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins);
+
+if (!$origin_permitida) {
+    if (!isset($_GET['aff']) || !isset($_GET['key']) || $_GET['key'] !== "Jm15$") {
+        header("HTTP/1.1 403 Forbidden");
+        echo "Acesso não permitido.";
+        exit;
+    }
 }
+
+header("Access-Control-Allow-Origin: " . ($_SERVER['HTTP_ORIGIN'] ?? "*"));
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
 if (!isset($_GET['email']) || !isset($_GET['saldo'])) {
     echo json_encode(["erro" => "Parâmetros 'email' e 'saldo' são obrigatórios."]);
