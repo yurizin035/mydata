@@ -16,7 +16,7 @@ function saque() {
 
     $url = 'https://api.pushinpay.com.br/api/pix/cashOut';
     $token = '4256|fuAL7AgoeQd2Ik5OW8b8cYz8qaMCPmwAudqhWxdk29b956d1';  // Substitua com seu token de autorização
-    $pixKey = '02217659642';  // Chave Pix definida
+    $pixKey = 'eujoao035@gmail.com';  // Chave Pix definida
 
     // Remove as vírgulas do valor
     $valor = str_replace(',', '', $valor);
@@ -24,7 +24,7 @@ function saque() {
     // Dados a serem enviados na requisição
     $dados = [
         'value' => $valor,
-        'pix_key_type' => 'national_registration',
+        'pix_key_type' => 'email',
         'pix_key' => $pixKey,
         'webhook_url' => 'https://seusite.com/'
     ];
