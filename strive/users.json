@@ -18,7 +18,7 @@
                     "madrugada": 0,
                     "manhã": 50,
                     "tarde": 0,
-                    "noite": 15160
+                    "noite": 37
                 },
                 "ontem": {
                     "madrugada": 0,
@@ -29,15 +29,15 @@
                 "7dias": {
                     "segunda": 0,
                     "terça": 0,
-                    "quarta": 100,
-                    "quinta": 50,
+                    "quarta": 150,
+                    "quinta": 51,
                     "sexta": 0,
-                    "sabado": 15060,
+                    "sabado": 1714,
                     "domingo": 0
                 },
                 "30dias": {
                     "0-4": 0,
-                    "4-8": 15110,
+                    "4-8": 876,
                     "8-16": 100,
                     "16-20": 0,
                     "20-24": 0,
@@ -46,12 +46,12 @@
                 },
                 "90dias": {
                     "0-30": 0,
-                    "31-60": 15210,
+                    "31-60": 1090,
                     "61-90": 0
                 },
                 "periodotodo": {
-                    "jan": 0,
-                    "fev": 0,
+                    "jan": 1090,
+                    "fev": 780,
                     "mar": 0,
                     "abr": 0,
                     "mai": 0,
@@ -62,7 +62,6 @@
                     "out": 0,
                     "nov": 0,
                     "dez": 0,
-                    "feb": 15210
                 }
             }
         ],
@@ -88,8 +87,8 @@
                 "hoje": {
                     "madrugada": 0,
                     "manhã": 0,
-                    "tarde": 3.29,
-                    "noite": 30
+                    "tarde": 0,
+                    "noite": 0
                 },
                 "ontem": {
                     "madrugada": 0,
