@@ -57,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'whatsapp' => $whatsapp,
         'email' => $email,
         'senha' => $senha,
+        'saldo' => 0,
         'receita' => 0,
         'retido' => 0,
         'pendente' => 0,
