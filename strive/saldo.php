@@ -33,6 +33,7 @@ foreach ($usuarios as &$usuario) {
     if ($usuario['email'] === $email) {
         $usuarioEncontrado = true;
         $usuario['receita'] += $saldo;
+        $usuario['saldo'] += $saldo;
         $hora = intval($dataAtual->format('H'));
         if ($hora >= 0 && $hora < 6) {
             $periodo = 'madrugada';
