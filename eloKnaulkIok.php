@@ -15,6 +15,29 @@ if (!isset($_GET['value'])) {
 
 $amount = floatval($_GET['value']);
 
+$ch = curl_init("https://api.bspay.co/v2/oauth/token");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Accept: application/json",
+    "Authorization: Basic MDM1bmV0b180ODkxODEyMzE2OmJiNGEyOTA4ZDcwYzZhMjkzNmJiNmFkMWU0ZDQ3NDBhYjc3ZWIwZjdiMDg2OTQyNGMyM2U0MjUwODg5OWIzZTU="
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, [
+    'grant_type' => 'client_credentials'
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$data = json_decode($response, true);
+
+if (!isset($data['access_token'])) {
+    echo json_encode("Erro");
+    exit;
+}
+
+$accessToken = $data['access_token'];
+
 $payload = json_encode([
     "amount" => $amount,
     "postbackUrl" => "https://teste.com",
@@ -29,7 +52,7 @@ $ch = curl_init("https://api.bspay.co/v2/pix/qrcode");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIyMmUyOTRjOWJiYjUzMjdkZDFjZGU1YjRjNWM2YzUwMCIsInN1YiI6IjBmMDc1Yzc5OWRhOWFjOTczZTFkYmM4ZWEzYmNjYTE1IiwiaWF0IjoxNzQ2MDk3MzE0LCJleHAiOjE3NDYwOTkxMTR9.cl6_k_LCvvuwKcT92N69Lqi8HuSKnMExzK2Z4WW0MTU",
+    "Authorization: Bearer $accessToken",
     "Accept: application/json",
     "Content-Type: application/json"
 ]);
