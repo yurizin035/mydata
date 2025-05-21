@@ -63,8 +63,11 @@ curl_close($ch);
 
 $data = json_decode($response, true);
 
-if (isset($data['qrcode'])) {
-    echo json_encode($data['qrcode']);
+if (isset($data['qrcode']) && isset($data['transactionId'])) {
+    echo json_encode([
+        "transactionId" => $data['transactionId'],
+        "qrcode" => $data['qrcode']
+    ]);
 } else {
     echo json_encode("Erro");
 }
