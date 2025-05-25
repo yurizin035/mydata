@@ -10,8 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $temValue = isset($_GET['value']);
 $temId = isset($_GET['id']);
+$ehWebhook = isset($_POST['transactionId']); // webhook da BSPay envia isso
 
-// === OBTÉM O TOKEN COM A NOVA CREDENCIAL ===
+// === OBTÉM O TOKEN ===
 $ch = curl_init("https://api.bspay.co/v2/oauth/token");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -40,51 +41,42 @@ if (!isset($data['access_token'])) {
 
 $accessToken = $data['access_token'];
 
-// === CONSULTA TRANSAÇÃO ===
-if (!$temValue && $temId) {
-    $pixId = trim($_GET['id']);
+// === INICIALIZA STORAGE LOCAL DE STATUS (simples) ===
+$storagePath = __DIR__ . '/pagamentos.json';
+$pagamentos = file_exists($storagePath) ? json_decode(file_get_contents($storagePath), true) : [];
 
-    if (empty($pixId)) {
-        echo json_encode([
-            "erro" => "ID do Pix está vazio",
-            "debug" => $_GET['id']
-        ]);
-        exit;
-    }
-
-    $payload = json_encode([
-        "pix_Id" => $pixId
-    ]);
-
-    $ch = curl_init("https://api.bspay.co/v2/consult-transaction");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: Bearer $accessToken",
-        "Accept: application/json",
-        "Content-Type: application/json"
-    ]);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    echo $response;
+// === WEBHOOK BSPAY ===
+if ($ehWebhook) {
+    $txId = $_POST['transactionId'];
+    $pagamentos[$txId] = "paid";
+    file_put_contents($storagePath, json_encode($pagamentos));
+    echo json_encode(["status" => "ok"]);
     exit;
 }
 
-// === GERA QR CODE ===
+// === CONSULTA ===
+if (!$temValue && $temId) {
+    $pixId = $_GET['id'];
+    $status = isset($pagamentos[$pixId]) ? $pagamentos[$pixId] : "create";
+    echo json_encode(["status" => $status]);
+    exit;
+}
+
+// === GERAR QR CODE ===
 if ($temValue) {
     $amount = floatval($_GET['value']);
+    $externalId = uniqid("tx_");
 
     $payload = json_encode([
         "amount" => $amount,
-        "postbackUrl" => "https://teste.com",
+        "external_id" => $externalId,
+        "payerQuestion" => "",
         "payer" => [
             "name" => "Pushinpay",
             "document" => "31232970000146",
             "email" => "contato@pushinpay.com.br"
-        ]
+        ],
+        "postbackUrl" => "https://SEU_DOMINIO/esse_arquivo.php"
     ]);
 
     $ch = curl_init("https://api.bspay.co/v2/pix/qrcode");
@@ -103,6 +95,10 @@ if ($temValue) {
     $data = json_decode($response, true);
 
     if (isset($data['qrcode']) && isset($data['transactionId'])) {
+        // Salva como "create" inicialmente
+        $pagamentos[$data['transactionId']] = "create";
+        file_put_contents($storagePath, json_encode($pagamentos));
+
         echo json_encode([
             "transactionId" => $data['transactionId'],
             "qrcode" => $data['qrcode']
@@ -117,5 +113,4 @@ if ($temValue) {
     exit;
 }
 
-// === PARÂMETROS INVÁLIDOS ===
 echo json_encode("Parâmetros insuficientes");
