@@ -11,13 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $temValue = isset($_GET['value']);
 $temId = isset($_GET['id']);
 
-// === OBTÉM O TOKEN ===
+// === OBTÉM O TOKEN COM A NOVA CREDENCIAL ===
 $ch = curl_init("https://api.bspay.co/v2/oauth/token");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Accept: application/json",
-    "Authorization: Basic MDM1bmV0b180ODkxODEyMzE2OmJiNGEyOTA4ZDcwYzZhMjkzNmJiNmFkMWU0ZDQ3NDBhYjc3ZWIwZjdiMDg2OTQyNGMyM2U0MjUwODg5OWIzZTU="
+    "Authorization: Basic MDM1bmV0b184MzYyMjI1NDgxOjVkMDU0YTI1MmE0ZTU3ZWNmNzQ2ZjI4NTU5ZDc0YTZlODM0NWUwMzdmZjIyM2NjZTg5OTgxYmUzYzQ2Yzc2MTE="
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, [
     'grant_type' => 'client_credentials'
@@ -31,7 +31,7 @@ $data = json_decode($response, true);
 
 if (!isset($data['access_token'])) {
     echo json_encode([
-        "erro" => "Erro ao obter token",
+        "erro" => "Error ao obter token",
         "http_code" => $httpCode,
         "resposta" => $response
     ]);
