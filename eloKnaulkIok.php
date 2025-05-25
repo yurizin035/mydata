@@ -31,7 +31,7 @@ $data = json_decode($response, true);
 
 if (!isset($data['access_token'])) {
     echo json_encode([
-        "erro" => "Error ao obter token",
+        "erro" => "Erro ao obter token",
         "http_code" => $httpCode,
         "resposta" => $response
     ]);
@@ -40,9 +40,17 @@ if (!isset($data['access_token'])) {
 
 $accessToken = $data['access_token'];
 
-// === CONSULTA TRANSAÇÃO CASO value NÃO EXISTA E id EXISTA ===
+// === CONSULTA TRANSAÇÃO ===
 if (!$temValue && $temId) {
-    $pixId = $_GET['id'];
+    $pixId = trim($_GET['id']);
+
+    if (empty($pixId)) {
+        echo json_encode([
+            "erro" => "ID do Pix está vazio",
+            "debug" => $_GET['id']
+        ]);
+        exit;
+    }
 
     $payload = json_encode([
         "pix_Id" => $pixId
@@ -65,7 +73,7 @@ if (!$temValue && $temId) {
     exit;
 }
 
-// === GERA QR CODE CASO EXISTA value ===
+// === GERA QR CODE ===
 if ($temValue) {
     $amount = floatval($_GET['value']);
 
@@ -109,5 +117,5 @@ if ($temValue) {
     exit;
 }
 
-// === CASO NENHUM PARÂMETRO VÁLIDO ===
+// === PARÂMETROS INVÁLIDOS ===
 echo json_encode("Parâmetros insuficientes");
