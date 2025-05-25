@@ -8,13 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if (!isset($_GET['value'])) {
-    echo json_encode("Erro");
-    exit;
-}
+$temValue = isset($_GET['value']);
+$temId = isset($_GET['id']);
 
-$amount = floatval($_GET['value']);
-
+// Primeiro obtém o token
 $ch = curl_init("https://api.bspay.co/v2/oauth/token");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -32,42 +29,77 @@ curl_close($ch);
 $data = json_decode($response, true);
 
 if (!isset($data['access_token'])) {
-    echo json_encode("Erro");
+    echo json_encode("Erro ao obter token");
     exit;
 }
 
 $accessToken = $data['access_token'];
 
-$payload = json_encode([
-    "amount" => $amount,
-    "postbackUrl" => "https://teste.com",
-    "payer" => [
-        "name" => "Pushinpay",
-        "document" => "31232970000146",
-        "email" => "contato@pushinpay.com.br"
-    ]
-]);
+// Se não houver value, mas houver id, faz a consulta da transação
+if (!$temValue && $temId) {
+    $pixId = $_GET['id'];
 
-$ch = curl_init("https://api.bspay.co/v2/pix/qrcode");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Authorization: Bearer $accessToken",
-    "Accept: application/json",
-    "Content-Type: application/json"
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-
-$response = curl_exec($ch);
-curl_close($ch);
-
-$data = json_decode($response, true);
-
-if (isset($data['qrcode']) && isset($data['transactionId'])) {
-    echo json_encode([
-        "transactionId" => $data['transactionId'],
-        "qrcode" => $data['qrcode']
+    $payload = json_encode([
+        "pix_Id" => $pixId
     ]);
-} else {
-    echo json_encode("Erro");
+
+    $ch = curl_init("https://api.bspay.co/v2/consult-transaction");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $accessToken",
+        "Accept: application/json",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    echo $response;
+    exit;
 }
+
+// Se houver value, gera um novo QR Code
+if ($temValue) {
+    $amount = floatval($_GET['value']);
+
+    $payload = json_encode([
+        "amount" => $amount,
+        "postbackUrl" => "https://teste.com",
+        "payer" => [
+            "name" => "Pushinpay",
+            "document" => "31232970000146",
+            "email" => "contato@pushinpay.com.br"
+        ]
+    ]);
+
+    $ch = curl_init("https://api.bspay.co/v2/pix/qrcode");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $accessToken",
+        "Accept: application/json",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $data = json_decode($response, true);
+
+    if (isset($data['qrcode']) && isset($data['transactionId'])) {
+        echo json_encode([
+            "transactionId" => $data['transactionId'],
+            "qrcode" => $data['qrcode']
+        ]);
+    } else {
+        echo json_encode("Erro ao gerar QR Code");
+    }
+
+    exit;
+}
+
+// Caso nenhum dos dois parâmetros esteja presente
+echo json_encode("Parâmetros insuficientes");
