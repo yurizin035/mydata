@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $temValue = isset($_GET['value']);
 $temId = isset($_GET['id']);
 
-// Primeiro obtém o token
+// === OBTÉM O TOKEN ===
 $ch = curl_init("https://api.bspay.co/v2/oauth/token");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -24,18 +24,23 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, [
 ]);
 
 $response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 $data = json_decode($response, true);
 
 if (!isset($data['access_token'])) {
-    echo json_encode("Erro ao obter token");
+    echo json_encode([
+        "erro" => "Erro ao obter token",
+        "http_code" => $httpCode,
+        "resposta" => $response
+    ]);
     exit;
 }
 
 $accessToken = $data['access_token'];
 
-// Se não houver value, mas houver id, faz a consulta da transação
+// === CONSULTA TRANSAÇÃO CASO value NÃO EXISTA E id EXISTA ===
 if (!$temValue && $temId) {
     $pixId = $_GET['id'];
 
@@ -60,7 +65,7 @@ if (!$temValue && $temId) {
     exit;
 }
 
-// Se houver value, gera um novo QR Code
+// === GERA QR CODE CASO EXISTA value ===
 if ($temValue) {
     $amount = floatval($_GET['value']);
 
@@ -95,11 +100,14 @@ if ($temValue) {
             "qrcode" => $data['qrcode']
         ]);
     } else {
-        echo json_encode("Erro ao gerar QR Code");
+        echo json_encode([
+            "erro" => "Erro ao gerar QR Code",
+            "resposta" => $response
+        ]);
     }
 
     exit;
 }
 
-// Caso nenhum dos dois parâmetros esteja presente
+// === CASO NENHUM PARÂMETRO VÁLIDO ===
 echo json_encode("Parâmetros insuficientes");
